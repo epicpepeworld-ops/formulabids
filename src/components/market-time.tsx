@@ -20,10 +20,10 @@ export function MarketTime({ endTime, className }: MarketTimeProps) {
     return (
         <div
             className={cn(
-                "mb-2 w-fit px-2 py-1 rounded border text-xs",
+                "mb-2 w-fit px-3 py-1 rounded border text-xs font-medium",
                 isEnded 
-                    ? "bg-red-200 border-red-300 text-red-800" 
-                    : "border-gray-300 text-gray-800",
+                    ? "bg-[#fe4545]/20 border-[#fe4545]/30 text-[#fe4545]" 
+                    : "bg-gray-800 border-gray-600 text-white",
                 className
             )}
         >
