@@ -23,14 +23,14 @@ export function MarketResolved({ marketId, outcome, optionA, optionB }: MarketRe
     const { data: sharesBalanceData } = useReadContract({
         contract,
         method: "function getSharesBalance(uint256 _marketId, address _user) view returns (uint256 optionAShares, uint256 optionBShares)",
-        params: account?.address ? [BigInt(marketId), account.address] : undefined
+        params: account?.address ? [BigInt(marketId), account.address] : [BigInt(0), ""]
     });
 
     // NEW: Check if user has already claimed using V3 function
     const { data: hasClaimedData } = useReadContract({
         contract,
         method: "function hasUserClaimed(uint256 _marketId, address _user) view returns (bool)",
-        params: account?.address ? [BigInt(marketId), account.address] : undefined
+        params: account?.address ? [BigInt(marketId), account.address] : [BigInt(0), ""]
     });
 
     // Get market info to calculate total winnings
@@ -100,7 +100,8 @@ export function MarketResolved({ marketId, outcome, optionA, optionB }: MarketRe
             console.error("Claim error:", error);
             
             // Check if error is because user already claimed
-            if (error?.message?.includes("Already claimed") || error?.message?.includes("already claimed")) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            if (errorMessage.includes("Already claimed") || errorMessage.includes("already claimed")) {
                 toast({
                     title: "Already Claimed",
                     description: "You have already claimed your rewards for this market.",
