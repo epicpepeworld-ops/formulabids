@@ -160,7 +160,7 @@ export function MarketBuyInterface({ marketId, market }: MarketBuyInterfaceProps
             const tx = await approve({
                 contract: tokenContract,
                 spender: contract.address,
-                amount: 1000n * 10n ** 6n  // 1000 USDC with 6 decimals
+                amount: 1000000000  // 1000 USDC with 6 decimals (1000 * 10^6)
             });
             await mutateTransaction(tx);
             setBuyingStep('confirm');
