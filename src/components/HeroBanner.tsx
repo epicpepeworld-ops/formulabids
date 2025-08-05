@@ -28,19 +28,19 @@ export function HeroBanner() {
     const { data: market1 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 1 ? [BigInt(1)] : undefined
+        params: marketCount && Number(marketCount) >= 1 ? [BigInt(1)] : [BigInt(0)]
     });
 
     const { data: market2 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 2 ? [BigInt(2)] : undefined
+        params: marketCount && Number(marketCount) >= 2 ? [BigInt(2)] : [BigInt(0)]
     });
 
     const { data: market3 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 3 ? [BigInt(3)] : undefined
+        params: marketCount && Number(marketCount) >= 3 ? [BigInt(3)] : [BigInt(0)]
     });
 
     // Process markets and sort by volume
@@ -106,7 +106,7 @@ export function HeroBanner() {
                                 Prediction Market
                             </h1>
                             <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
-                                From driver transfers to race day weather – predict the F1 moments that matter and earn real money when you are right.
+                                From driver transfers to race day weather – predict the F1 moments that matter and earn real money when you&apos;re right.
                             </p>
                         </div>
 
