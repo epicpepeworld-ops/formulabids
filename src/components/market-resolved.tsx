@@ -96,7 +96,7 @@ export function MarketResolved({ marketId, outcome, optionA, optionB }: MarketRe
                 duration: 5000,
             });
             
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Claim error:", error);
             
             // Check if error is because user already claimed
@@ -130,7 +130,7 @@ export function MarketResolved({ marketId, outcome, optionA, optionB }: MarketRe
         if (!hasAnyShares) {
             return (
                 <div className="text-center text-gray-400 py-3">
-                    You didn't participate in this market
+                    You didn&apos;t participate in this market
                 </div>
             );
         }
