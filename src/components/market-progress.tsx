@@ -1,4 +1,3 @@
-import { Progress } from "@/components/ui/progress";
 
 interface MarketProgressProps {
     optionA: string;
