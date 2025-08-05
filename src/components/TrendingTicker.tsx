@@ -13,16 +13,6 @@ export function TrendingTicker() {
 
     const [tickerItems, setTickerItems] = useState<string[]>([]);
 
-    // Get the latest 5 markets (or fewer if not available)
-    const getLatestMarketIds = (totalMarkets: number) => {
-        const latest = [];
-        const start = Math.max(1, totalMarkets - 4); // Get last 5, or start from 1
-        for (let i = start; i <= totalMarkets; i++) {
-            latest.push(i);
-        }
-        return latest;
-    };
-
     // Fetch market questions using useReadContract for each market
     const { data: market1 } = useReadContract({
         contract,
@@ -70,7 +60,7 @@ export function TrendingTicker() {
         ];
 
         // Ensure we have at least 1 item, fill up to 5
-        let combinedItems = [...marketTitles];
+        const combinedItems = [...marketTitles];
         while (combinedItems.length < 5) {
             const randomFlair = flairItems[Math.floor(Math.random() * flairItems.length)];
             if (!combinedItems.includes(randomFlair)) {

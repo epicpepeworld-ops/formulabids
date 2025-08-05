@@ -106,7 +106,7 @@ export function HeroBanner() {
                                 Prediction Market
                             </h1>
                             <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
-                                From driver transfers to race day weather – predict the F1 moments that matter and earn real money when you're right.
+                                From driver transfers to race day weather – predict the F1 moments that matter and earn real money when you are right.
                             </p>
                         </div>
 

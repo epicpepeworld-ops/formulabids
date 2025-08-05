@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useState, useRef, useEffect } from "react";
 import { useActiveAccount, useSendAndConfirmTransaction, useReadContract } from "thirdweb/react";
-import { prepareContractCall, readContract, toWei } from "thirdweb";
+import { prepareContractCall, readContract } from "thirdweb";
 import { contract, tokenContract } from "@/constants/contract";
 import { approve } from "thirdweb/extensions/erc20";
 import { Loader2 } from "lucide-react";
