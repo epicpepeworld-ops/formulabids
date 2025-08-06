@@ -138,7 +138,7 @@ export function MarketCard({ index, filter }: MarketCardProps) {
                         {market && <MarketTime endTime={market.endTime} />}
                         <CardTitle className="font-alliance">{market?.question}</CardTitle>
                     </CardHeader>
-                    <CardContent className="relative">
+                    <CardContent>
                         {market && (
                             <MarketProgress 
                                 optionA={market.optionA}
@@ -177,19 +177,19 @@ export function MarketCard({ index, filter }: MarketCardProps) {
                                 market={market!}
                             />
                         )}
-                        
-                        {/* Market ID in lower right corner */}
-                        <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-black/50 px-2 py-1 rounded">
-                            #{index}
-                        </div>
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="flex justify-between items-center">
                         {market && sharesBalance && (
                             <MarketSharesDisplay 
                                 market={market}
                                 sharesBalance={sharesBalance}
                             />
                         )}
+                        
+                        {/* Market ID on the right side of footer */}
+                        <div className="text-xs text-gray-500">
+                            Market #{index}
+                        </div>
                     </CardFooter>
                 </>
             )}
