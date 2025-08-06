@@ -126,10 +126,8 @@ export function HeroBanner() {
                                 View All Markets
                             </button>
                         </div>
-  <div className="text-center mt-6">
-                            <p className="text-sm text-gray-500 font-medium">
-                                Powered by <span className="text-[#34f876]">USDC</span> on <span className="text-[#0052FF]">Base Network</span>
-                            </p>
+<div className="text-sm text-gray-400">
+                            Powered by <span className="text-[#34f876]">USDC</span> on <span className="text-blue-400">Base Network</span>
                         </div>
                     </div>
 

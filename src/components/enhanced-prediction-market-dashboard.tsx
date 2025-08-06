@@ -36,34 +36,28 @@ export function EnhancedPredictionMarketDashboard() {
                 <HeroBanner />
                 
                 <div className="container mx-auto p-4">
-                    <Tabs defaultValue="active" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 bg-[#171717] border-[#34f876]/20">
+<Tabs defaultValue="active" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3 bg-[#171717] border-[#34f876]/20 gap-1 p-1">
                             <TabsTrigger 
                                 value="active"
-                                className="data-[state=active]:bg-[#34f876] data-[state=active]:text-black text-gray-400"
+                                className="data-[state=active]:bg-[#34f876] data-[state=active]:text-black text-gray-400 text-xs sm:text-sm px-2 py-2 rounded-md"
                             >
                                 Active
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="pending"
-                                className="data-[state=active]:bg-[#34f876] data-[state=active]:text-black text-gray-400"
+                                className="data-[state=active]:bg-[#34f876] data-[state=active]:text-black text-gray-400 text-xs sm:text-sm px-2 py-2 rounded-md"
                             >
-                                Pending Resolution
+                                <span className="hidden sm:inline">Pending Resolution</span>
+                                <span className="sm:hidden">Pending</span>
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="resolved"
-                                className="data-[state=active]:bg-[#34f876] data-[state=active]:text-black text-gray-400"
+                                className="data-[state=active]:bg-[#34f876] data-[state=active]:text-black text-gray-400 text-xs sm:text-sm px-2 py-2 rounded-md"
                             >
                                 Resolved
                             </TabsTrigger>
                         </TabsList>
-                        
-                        {isLoadingMarketCount ? (
-                            <TabsContent value="active" className="mt-6">
-                                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    {skeletonCards}
-                                </div>
-                            </TabsContent>
                         ) : (
                             <>
                                 <TabsContent value="active">
