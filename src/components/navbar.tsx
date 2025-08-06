@@ -15,7 +15,7 @@ export function Navbar() {
                 <div className="w-8 h-8 bg-[#34f876] rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-black" />
                 </div>
-                <h1 className="text-2xl font-bold text-[#34f876] font-alliance">FormulaBids</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-[#34f876] font-alliance">FormulaBids</h1>
             </div>
             
             <div className="items-center flex gap-3">
@@ -25,13 +25,16 @@ export function Navbar() {
                     chain={baseMainnet}
                     connectButton={{
                         style: {
-                            fontSize: '0.875rem !important',
-                            height: '2.5rem !important',
+                            fontSize: '0.75rem !important', // Smaller on mobile
+                            height: '2.25rem !important', // Slightly shorter
+                            minWidth: '70px !important', // Minimum width
+                            maxWidth: '90px !important', // Maximum width for mobile
                             backgroundColor: '#23432b',
                             color: '#36f776',
                             border: 'none',
                             borderRadius: '0.5rem',
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            padding: '0 12px !important' // Better padding
                         },
                         label: 'Log In',
                     }}
@@ -40,11 +43,14 @@ export function Navbar() {
                             [baseMainnet.id]: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
                         },
                         style: {
+                            fontSize: '0.75rem !important',
+                            height: '2.25rem !important',
                             backgroundColor: '#23432b',
                             color: '#36f776',
                             border: 'none',
                             borderRadius: '0.5rem',
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            padding: '0 8px !important'
                         }
                     }}
                     wallets={[

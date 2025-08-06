@@ -126,6 +126,11 @@ export function HeroBanner() {
                                 View All Markets
                             </button>
                         </div>
+  <div className="text-center mt-6">
+                            <p className="text-sm text-gray-500 font-medium">
+                                Powered by <span className="text-[#34f876]">USDC</span> on <span className="text-[#0052FF]">Base Network</span>
+                            </p>
+                        </div>
                     </div>
 
                     {/* Right side - Rotating market preview */}
