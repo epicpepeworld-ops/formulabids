@@ -67,6 +67,15 @@ export function MarketCard({ index, filter }: MarketCardProps) {
         params: [BigInt(index), account?.address as string]
     });
 
+    // NEW: Check if market is refunded
+    const { data: isRefundedData } = useReadContract({
+        contract,
+        method: "function isMarketRefunded(uint256 _marketId) view returns (bool)",
+        params: [BigInt(index)]
+    });
+
+    const isRefunded = isRefundedData || false;
+
     // Parse the shares balance
     const sharesBalance: SharesBalance | undefined = sharesBalanceData ? {
         optionAShares: sharesBalanceData[0],
@@ -81,6 +90,11 @@ export function MarketCard({ index, filter }: MarketCardProps) {
     // Check if the market should be shown
     const shouldShow = () => {
         if (!market) return false;
+        
+        // NEW: Refunded markets always go to resolved section
+        if (isRefunded) {
+            return filter === 'resolved';
+        }
         
         switch (filter) {
             case 'active':
@@ -106,7 +120,7 @@ export function MarketCard({ index, filter }: MarketCardProps) {
             ) : (
                 <>
                     <CardHeader>
-                        {/* NEW: Display market image if available */}
+                        {/* Display market image if available */}
                         {market?.imageUrl && (
                             <div className="mb-4 w-full h-48 rounded-lg overflow-hidden">
                                 <img 
@@ -124,16 +138,29 @@ export function MarketCard({ index, filter }: MarketCardProps) {
                         {market && <MarketTime endTime={market.endTime} />}
                         <CardTitle className="font-alliance">{market?.question}</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="relative">
                         {market && (
                             <MarketProgress 
                                 optionA={market.optionA}
                                 optionB={market.optionB}
                                 totalOptionAShares={market.totalOptionAShares}
                                 totalOptionBShares={market.totalOptionBShares}
+                                isRefunded={isRefunded}
                             />
                         )}
-                        {new Date(Number(market?.endTime) * 1000) < new Date() ? (
+                        {/* NEW: Handle refunded markets */}
+                        {isRefunded ? (
+                            <div className="p-4 bg-gray-800/50 border-2 border-gray-600 rounded-lg">
+                                <div className="text-center">
+                                    <div className="text-lg font-bold text-gray-300 mb-2 font-alliance">
+                                        Market Refunded
+                                    </div>
+                                    <div className="text-sm text-gray-400">
+                                        Funds have been sent back to your wallet
+                                    </div>
+                                </div>
+                            </div>
+                        ) : new Date(Number(market?.endTime) * 1000) < new Date() ? (
                             market?.resolved ? (
                                 <MarketResolved 
                                     marketId={index}
@@ -150,6 +177,11 @@ export function MarketCard({ index, filter }: MarketCardProps) {
                                 market={market!}
                             />
                         )}
+                        
+                        {/* Market ID in lower right corner */}
+                        <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-black/50 px-2 py-1 rounded">
+                            #{index}
+                        </div>
                     </CardContent>
                     <CardFooter>
                         {market && sharesBalance && (

@@ -4,49 +4,80 @@ import { TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function TrendingTicker() {
-    // Get market count
-    const { data: marketCount } = useReadContract({
+    const [tickerItems, setTickerItems] = useState<string[]>([]);
+    const [selectedMarketIds, setSelectedMarketIds] = useState<number[]>([]);
+
+    // Get active markets
+    const { data: activeMarketIds, refetch: refetchActiveMarkets } = useReadContract({
         contract,
-        method: "function marketCount() view returns (uint256)",
+        method: "function getActiveMarkets() view returns (uint256[])",
         params: []
     });
 
-    const [tickerItems, setTickerItems] = useState<string[]>([]);
-
-    // Fetch market questions using useReadContract for each market
+    // Get market info for each selected market (we'll fetch up to 5)
     const { data: market1 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 1 ? [BigInt(1)] : [BigInt(0)]
+        params: selectedMarketIds.length > 0 ? [BigInt(selectedMarketIds[0])] : [BigInt(0)]
     });
 
     const { data: market2 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 2 ? [BigInt(2)] : [BigInt(0)]
+        params: selectedMarketIds.length > 1 ? [BigInt(selectedMarketIds[1])] : [BigInt(0)]
     });
 
     const { data: market3 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 3 ? [BigInt(3)] : [BigInt(0)]
+        params: selectedMarketIds.length > 2 ? [BigInt(selectedMarketIds[2])] : [BigInt(0)]
     });
 
     const { data: market4 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 4 ? [BigInt(4)] : [BigInt(0)]
+        params: selectedMarketIds.length > 3 ? [BigInt(selectedMarketIds[3])] : [BigInt(0)]
     });
 
     const { data: market5 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 5 ? [BigInt(5)] : [BigInt(0)]
+        params: selectedMarketIds.length > 4 ? [BigInt(selectedMarketIds[4])] : [BigInt(0)]
     });
 
-    useEffect(() => {
-        if (!marketCount) return;
+    // Function to randomly select 5 markets from active markets
+    const selectRandomMarkets = (activeIds: bigint[]) => {
+        if (activeIds.length === 0) return [];
+        
+        const shuffled = [...activeIds].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, Math.min(5, shuffled.length));
+        return selected.map(id => Number(id));
+    };
 
+    // Select random markets when active markets change
+    useEffect(() => {
+        if (activeMarketIds && activeMarketIds.length > 0) {
+            const randomMarkets = selectRandomMarkets(activeMarketIds);
+            setSelectedMarketIds(randomMarkets);
+            console.log("🎲 Selected random markets for ticker:", randomMarkets);
+        }
+    }, [activeMarketIds]);
+
+    // Auto-refresh every 24 hours
+    useEffect(() => {
+        const refreshInterval = setInterval(() => {
+            console.log("🔄 Refreshing ticker markets...");
+            
+            // Refetch active markets
+            refetchActiveMarkets();
+            
+        }, 24 * 60 * 60 * 1000); // 24 hours
+
+        return () => clearInterval(refreshInterval);
+    }, [refetchActiveMarkets]);
+
+    // Process market data into ticker items
+    useEffect(() => {
         const markets = [market1, market2, market3, market4, market5].filter(Boolean);
         const marketTitles = markets.map(market => `🏎️ ${market![0]}`); // market[0] is the question
 
@@ -69,7 +100,7 @@ export function TrendingTicker() {
         }
 
         setTickerItems(combinedItems);
-    }, [marketCount, market1, market2, market3, market4, market5]);
+    }, [market1, market2, market3, market4, market5]);
 
     // Fallback content while loading
     const fallbackItems = [

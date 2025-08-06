@@ -3,7 +3,7 @@ import { getContract } from "thirdweb";
 import { defineChain } from "thirdweb/chains";
 
 // Your deployed F1 Prediction Market contract
-export const contractAddress = "0x60eFE0cC54D3d03D54856a76Bd15931CEfE84F80"; // Your full address
+export const contractAddress = "0xF8D33FA73D9086412E0F12108B52dEadAFF6580f"; // Your full address
 
 // USDC contract on Base
 export const tokenAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";

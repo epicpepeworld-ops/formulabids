@@ -14,60 +14,86 @@ interface MarketData {
 }
 
 export function HeroBanner() {
-    // Get market count
-    const { data: marketCount } = useReadContract({
+    const [topMarkets, setTopMarkets] = useState<MarketData[]>([]);
+    const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
+    const [refreshKey, setRefreshKey] = useState(0); // NEW: Force refresh of contract calls
+
+    // Get top 3 markets by volume from active markets
+    const { data: topMarketIds, refetch: refetchTopMarkets } = useReadContract({
         contract,
-        method: "function marketCount() view returns (uint256)",
+        method: "function getMarketsByVolume(uint256 _limit) view returns (uint256[])",
+        params: [BigInt(3)] // Get top 3 by volume
+    });
+
+    // Get active markets to filter out expired/resolved ones
+    const { data: activeMarketIds, refetch: refetchActiveMarkets } = useReadContract({
+        contract,
+        method: "function getActiveMarkets() view returns (uint256[])",
         params: []
     });
 
-    const [topMarkets, setTopMarkets] = useState<MarketData[]>([]);
-    const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
-
-    // Fetch top 3 markets for rotation
+    // Get market info for the first top market
+    const firstMarketId = topMarketIds && activeMarketIds && topMarketIds.length > 0 ? 
+        topMarketIds.find(id => activeMarketIds.includes(id)) : undefined;
+    
     const { data: market1 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 1 ? [BigInt(1)] : [BigInt(0)]
+        params: firstMarketId ? [firstMarketId] : [BigInt(0)]
     });
 
+    // Get market info for the second top market
+    const secondMarketId = topMarketIds && activeMarketIds && topMarketIds.length > 1 ? 
+        topMarketIds.find((id, index) => index === 1 && activeMarketIds.includes(id)) : undefined;
+    
     const { data: market2 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 2 ? [BigInt(2)] : [BigInt(0)]
+        params: secondMarketId ? [secondMarketId] : [BigInt(0)]
     });
 
+    // Get market info for the third top market
+    const thirdMarketId = topMarketIds && activeMarketIds && topMarketIds.length > 2 ? 
+        topMarketIds.find((id, index) => index === 2 && activeMarketIds.includes(id)) : undefined;
+    
     const { data: market3 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: marketCount && Number(marketCount) >= 3 ? [BigInt(3)] : [BigInt(0)]
+        params: thirdMarketId ? [thirdMarketId] : [BigInt(0)]
     });
 
-    // Process markets and sort by volume
+    // Process markets and create display data
     useEffect(() => {
-        // Get top 3 for rotation
-        const markets = [market1, market2, market3]
-            .filter(Boolean)
-            .map((market, index) => {
-                const totalOptionAShares = Number(market![6]) / 1000000;
-                const totalOptionBShares = Number(market![7]) / 1000000;
+        if (!topMarketIds || !activeMarketIds) return;
+
+        const markets: MarketData[] = [];
+        const marketDataArray = [
+            { data: market1, id: firstMarketId },
+            { data: market2, id: secondMarketId },
+            { data: market3, id: thirdMarketId }
+        ];
+
+        marketDataArray.forEach(({ data, id }) => {
+            if (data && id && activeMarketIds.includes(id)) {
+                const totalOptionAShares = Number(data[6]) / 1000000;
+                const totalOptionBShares = Number(data[7]) / 1000000;
                 const totalVolume = totalOptionAShares + totalOptionBShares;
                 const yesPercentage = totalVolume > 0 ? (totalOptionAShares / totalVolume) * 100 : 50;
 
-                return {
-                    id: index + 1,
-                    question: market![0],
-                    optionA: market![1],
-                    optionB: market![2],
-                    imageUrl: market![3],
+                markets.push({
+                    id: Number(id),
+                    question: data[0],
+                    optionA: data[1],
+                    optionB: data[2],
+                    imageUrl: data[3],
                     totalVolume,
                     yesPercentage
-                };
-            })
-            .sort((a, b) => b.totalVolume - a.totalVolume); // Sort by volume descending
+                });
+            }
+        });
 
         setTopMarkets(markets);
-    }, [market1, market2, market3]);
+    }, [topMarketIds, activeMarketIds, market1, market2, market3, firstMarketId, secondMarketId, thirdMarketId]);
 
     // Auto-rotate markets every 4 seconds
     useEffect(() => {
@@ -79,6 +105,23 @@ export function HeroBanner() {
 
         return () => clearInterval(interval);
     }, [topMarkets.length]);
+
+    // NEW: Auto-refresh every 24 hours
+    useEffect(() => {
+        const refreshInterval = setInterval(() => {
+            console.log("🔄 Refreshing hero banner markets...");
+            
+            // Refetch market data
+            refetchTopMarkets();
+            refetchActiveMarkets();
+            
+            // Force refresh by updating key
+            setRefreshKey(prev => prev + 1);
+            
+        }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+
+        return () => clearInterval(refreshInterval);
+    }, [refetchTopMarkets, refetchActiveMarkets]);
 
     // Smooth scroll to tabs function
     const scrollToTabs = () => {
@@ -126,14 +169,16 @@ export function HeroBanner() {
                                 View All Markets
                             </button>
                         </div>
-<div className="text-sm text-gray-400">
+
+                        {/* Powered by text - aligned with buttons */}
+                        <div className="text-sm text-gray-400">
                             Powered by <span className="text-[#34f876]">USDC</span> on <span className="text-blue-400">Base Network</span>
                         </div>
                     </div>
 
                     {/* Right side - Rotating market preview */}
                     <div className="relative">
-                        {currentMarket && (
+                        {currentMarket ? (
                             <div className="relative bg-[#171717] rounded-xl border border-gray-800 p-6 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300">
                                 {/* Market image */}
                                 <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
@@ -194,6 +239,13 @@ export function HeroBanner() {
                                     </div>
                                 )}
                             </div>
+                        ) : (
+                            /* Fallback when no active markets */
+                            <div className="bg-[#171717] rounded-xl border border-gray-800 p-6 text-center">
+                                <div className="text-6xl mb-4">🏎️</div>
+                                <h3 className="text-white font-bold text-lg mb-2">No Active Markets</h3>
+                                <p className="text-gray-400">New F1 prediction markets coming soon!</p>
+                            </div>
                         )}
 
                         {/* Rotation indicators */}
@@ -210,15 +262,6 @@ export function HeroBanner() {
                                         }`}
                                     />
                                 ))}
-                            </div>
-                        )}
-
-                        {/* Fallback when no markets */}
-                        {topMarkets.length === 0 && (
-                            <div className="bg-[#171717] rounded-xl border border-gray-800 p-6 text-center">
-                                <div className="text-6xl mb-4">🏎️</div>
-                                <h3 className="text-white font-bold text-lg mb-2">Markets Loading...</h3>
-                                <p className="text-gray-400">F1 prediction markets will appear here</p>
                             </div>
                         )}
                     </div>
