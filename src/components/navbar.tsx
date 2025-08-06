@@ -54,7 +54,17 @@ export function Navbar() {
                         }
                     }}
                     wallets={[
-                        inAppWallet(),
+                        inAppWallet({
+                            auth: {
+                                options: [
+                                    "email",
+                                    "google", 
+                                    "apple",
+                                    "facebook",
+                                    "passkey"
+                                ]
+                            }
+                        }),
                     ]}
                     accountAbstraction={{
                         chain: baseMainnet,
