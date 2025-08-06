@@ -165,7 +165,29 @@ export function MarketBuyInterface({ marketId, market }: MarketBuyInterfaceProps
             await mutateTransaction(tx);
             setBuyingStep('confirm');
         } catch (error) {
-            console.error(error);
+            console.error("Approval error:", error);
+            
+            // Better error handling for approval
+            if (error && typeof error === 'object' && 'message' in error) {
+                const errorMessage = (error as any).message?.toLowerCase() || '';
+                
+                if (errorMessage.includes('insufficient funds') || 
+                    errorMessage.includes('insufficient balance') ||
+                    errorMessage.includes('transfer amount exceeds balance')) {
+                    
+                    toast({
+                        title: "Not Enough Funds",
+                        description: "Please top up your wallet with USDC on Base network",
+                        variant: "destructive"
+                    });
+                } else {
+                    toast({
+                        title: "Approval Failed",
+                        description: "There was an error approving USDC spending",
+                        variant: "destructive"
+                    });
+                }
+            }
         } finally {
             setIsApproving(false);
         }
@@ -190,12 +212,53 @@ export function MarketBuyInterface({ marketId, market }: MarketBuyInterfaceProps
                 
             handleCancel();
         } catch (error) {
-            console.error(error);
-            toast({
-                title: "Bet Failed",
-                description: "There was an error processing your bet",
-                variant: "destructive",
-            })
+            console.error("Betting error:", error);
+            
+            // Better error handling for betting
+            if (error && typeof error === 'object' && 'message' in error) {
+                const errorMessage = (error as any).message?.toLowerCase() || '';
+                
+                if (errorMessage.includes('insufficient funds') || 
+                    errorMessage.includes('insufficient balance') ||
+                    errorMessage.includes('transfer amount exceeds balance')) {
+                    
+                    toast({
+                        title: "Not Enough Funds",
+                        description: "Please top up your wallet with USDC on Base network",
+                        variant: "destructive"
+                    });
+                } else if (errorMessage.includes('market has expired')) {
+                    toast({
+                        title: "Market Expired",
+                        description: "This market has expired and no longer accepts bets",
+                        variant: "destructive"
+                    });
+                } else if (errorMessage.includes('market has been resolved')) {
+                    toast({
+                        title: "Market Already Resolved",
+                        description: "This market has already been resolved",
+                        variant: "destructive"
+                    });
+                } else if (errorMessage.includes('market is hidden')) {
+                    toast({
+                        title: "Market Unavailable",
+                        description: "This market is currently unavailable",
+                        variant: "destructive"
+                    });
+                } else {
+                    toast({
+                        title: "Bet Failed",
+                        description: "There was an error processing your bet",
+                        variant: "destructive"
+                    });
+                }
+            } else {
+                toast({
+                    title: "Bet Failed",
+                    description: "There was an error processing your bet",
+                    variant: "destructive"
+                });
+            }
         } finally {
             setIsBuying(false);
         }
