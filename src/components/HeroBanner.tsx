@@ -16,7 +16,6 @@ interface MarketData {
 export function HeroBanner() {
     const [topMarkets, setTopMarkets] = useState<MarketData[]>([]);
     const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
-    const [refreshKey, setRefreshKey] = useState(0); // NEW: Force refresh of contract calls
 
     // Get top 3 markets by volume from active markets
     const { data: topMarketIds, refetch: refetchTopMarkets } = useReadContract({
@@ -114,9 +113,6 @@ export function HeroBanner() {
             // Refetch market data
             refetchTopMarkets();
             refetchActiveMarkets();
-            
-            // Force refresh by updating key
-            setRefreshKey(prev => prev + 1);
             
         }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
 
