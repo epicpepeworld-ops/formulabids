@@ -46,7 +46,7 @@ export function TrendingTicker() {
     });
 
     // Function to randomly select 5 markets from active markets
-    const selectRandomMarkets = (activeIds: bigint[]) => {
+    const selectRandomMarkets = (activeIds: readonly bigint[]) => {
         if (activeIds.length === 0) return [];
         
         const shuffled = [...activeIds].sort(() => 0.5 - Math.random());
