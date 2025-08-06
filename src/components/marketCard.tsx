@@ -74,7 +74,15 @@ export function MarketCard({ index, filter }: MarketCardProps) {
         params: [BigInt(index)]
     });
 
+    // NEW V5: Check if market is hidden
+    const { data: isHiddenData } = useReadContract({
+        contract,
+        method: "function isMarketHidden(uint256 _marketId) view returns (bool)",
+        params: [BigInt(index)]
+    });
+
     const isRefunded = isRefundedData || false;
+    const isHidden = isHiddenData || false;
 
     // Parse the shares balance
     const sharesBalance: SharesBalance | undefined = sharesBalanceData ? {
@@ -90,6 +98,11 @@ export function MarketCard({ index, filter }: MarketCardProps) {
     // Check if the market should be shown
     const shouldShow = () => {
         if (!market) return false;
+        
+        // NEW V5: Hide hidden markets entirely
+        if (isHidden) {
+            return false;
+        }
         
         // NEW: Refunded markets always go to resolved section
         if (isRefunded) {
