@@ -169,7 +169,7 @@ export function MarketBuyInterface({ marketId, market }: MarketBuyInterfaceProps
             
             // Better error handling for approval
             if (error && typeof error === 'object' && 'message' in error) {
-                const errorMessage = (error as any).message?.toLowerCase() || '';
+                const errorMessage = (error as { message?: string }).message?.toLowerCase() || '';
                 
                 if (errorMessage.includes('insufficient funds') || 
                     errorMessage.includes('insufficient balance') ||
@@ -216,7 +216,7 @@ export function MarketBuyInterface({ marketId, market }: MarketBuyInterfaceProps
             
             // Better error handling for betting
             if (error && typeof error === 'object' && 'message' in error) {
-                const errorMessage = (error as any).message?.toLowerCase() || '';
+                const errorMessage = (error as { message?: string }).message?.toLowerCase() || '';
                 
                 if (errorMessage.includes('insufficient funds') || 
                     errorMessage.includes('insufficient balance') ||
