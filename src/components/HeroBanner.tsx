@@ -196,8 +196,8 @@ export function HeroBanner() {
                         </div>
                     </div>
 
-                    {/* Right side - Rotating market preview */}
-                    <div className="relative">
+                    {/* Right side - Rotating market preview (HIDDEN ON MOBILE) */}
+                    <div className="relative hidden lg:block">
                         {currentMarket ? (
                             <div className="relative bg-[#171717] rounded-xl border border-gray-800 p-6 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300">
                                 {/* Market image */}
