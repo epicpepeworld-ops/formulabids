@@ -1,6 +1,6 @@
 import { useReadContract } from "thirdweb/react";
 import { contract } from "@/constants/contract";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronRight, TrendingUp } from "lucide-react";
 
 interface MarketData {
@@ -14,6 +14,8 @@ interface MarketData {
 }
 
 export function HeroBanner() {
+    console.log("🏎️ HeroBanner component loaded");
+    
     const [topMarkets, setTopMarkets] = useState<MarketData[]>([]);
     const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
 
@@ -31,9 +33,16 @@ export function HeroBanner() {
         params: []
     });
 
+    console.log("📊 Debug - topMarketIds:", topMarketIds);
+    console.log("📊 Debug - activeMarketIds:", activeMarketIds);
+
     // Filter topMarketIds to only include active markets and get first 3
-    const activeTopMarketIds = topMarketIds && activeMarketIds ? 
-        topMarketIds.filter(id => activeMarketIds.includes(id)).slice(0, 3) : [];
+    const activeTopMarketIds = useMemo(() => {
+        if (!topMarketIds || !activeMarketIds) return [];
+        const filtered = topMarketIds.filter(id => activeMarketIds.includes(id)).slice(0, 3);
+        console.log("📊 Debug - activeTopMarketIds:", filtered);
+        return filtered;
+    }, [topMarketIds, activeMarketIds]);
 
     // Get market info for the first top market
     const { data: market1 } = useReadContract({
@@ -56,9 +65,12 @@ export function HeroBanner() {
         params: activeTopMarketIds.length > 2 ? [activeTopMarketIds[2]] : [BigInt(0)]
     });
 
-    // Process markets and create display data
+    // Process markets and create display data - FIXED DEPENDENCIES
     useEffect(() => {
-        if (!activeTopMarketIds || activeTopMarketIds.length === 0) return;
+        if (activeTopMarketIds.length === 0) {
+            console.log("⚠️ No activeTopMarketIds available");
+            return;
+        }
 
         const markets: MarketData[] = [];
         const marketDataArray = [
@@ -66,6 +78,8 @@ export function HeroBanner() {
             { data: market2, id: activeTopMarketIds[1] },
             { data: market3, id: activeTopMarketIds[2] }
         ];
+
+        let hasNewMarkets = false;
 
         marketDataArray.forEach(({ data, id }, index) => {
             if (data && id) {
@@ -84,13 +98,21 @@ export function HeroBanner() {
                     yesPercentage
                 });
                 
+                hasNewMarkets = true;
                 console.log(`🔥 Hero market ${index + 1}:`, data[0], `Volume: $${totalVolume.toFixed(2)}`);
             }
         });
 
-        setTopMarkets(markets);
-        console.log("📊 Total hero markets loaded:", markets.length);
-    }, [activeTopMarketIds, market1, market2, market3]);
+        if (hasNewMarkets) {
+            setTopMarkets(markets);
+            console.log("📊 Total hero markets loaded:", markets.length);
+        }
+    }, [
+        activeTopMarketIds.length, 
+        market1?.[0], 
+        market2?.[0], 
+        market3?.[0]
+    ]); // FIXED: Only depend on stable values
 
     // Auto-rotate markets every 4 seconds
     useEffect(() => {
@@ -103,16 +125,13 @@ export function HeroBanner() {
         return () => clearInterval(interval);
     }, [topMarkets.length]);
 
-    // NEW: Auto-refresh every 24 hours
+    // Auto-refresh every 24 hours
     useEffect(() => {
         const refreshInterval = setInterval(() => {
             console.log("🔄 Refreshing hero banner markets...");
-            
-            // Refetch market data
             refetchTopMarkets();
             refetchActiveMarkets();
-            
-        }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+        }, 24 * 60 * 60 * 1000);
 
         return () => clearInterval(refreshInterval);
     }, [refetchTopMarkets, refetchActiveMarkets]);
