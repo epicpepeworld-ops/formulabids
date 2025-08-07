@@ -31,49 +31,44 @@ export function HeroBanner() {
         params: []
     });
 
+    // Filter topMarketIds to only include active markets and get first 3
+    const activeTopMarketIds = topMarketIds && activeMarketIds ? 
+        topMarketIds.filter(id => activeMarketIds.includes(id)).slice(0, 3) : [];
+
     // Get market info for the first top market
-    const firstMarketId = topMarketIds && activeMarketIds && topMarketIds.length > 0 ? 
-        topMarketIds.find(id => activeMarketIds.includes(id)) : undefined;
-    
     const { data: market1 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: firstMarketId ? [firstMarketId] : [BigInt(0)]
+        params: activeTopMarketIds.length > 0 ? [activeTopMarketIds[0]] : [BigInt(0)]
     });
 
     // Get market info for the second top market
-    const secondMarketId = topMarketIds && activeMarketIds && topMarketIds.length > 1 ? 
-        topMarketIds.find((id, index) => index === 1 && activeMarketIds.includes(id)) : undefined;
-    
     const { data: market2 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: secondMarketId ? [secondMarketId] : [BigInt(0)]
+        params: activeTopMarketIds.length > 1 ? [activeTopMarketIds[1]] : [BigInt(0)]
     });
 
     // Get market info for the third top market
-    const thirdMarketId = topMarketIds && activeMarketIds && topMarketIds.length > 2 ? 
-        topMarketIds.find((id, index) => index === 2 && activeMarketIds.includes(id)) : undefined;
-    
     const { data: market3 } = useReadContract({
         contract,
         method: "function getMarketInfo(uint256 _marketId) view returns (string question, string optionA, string optionB, string imageUrl, uint256 endTime, uint8 outcome, uint256 totalOptionAShares, uint256 totalOptionBShares, bool resolved)",
-        params: thirdMarketId ? [thirdMarketId] : [BigInt(0)]
+        params: activeTopMarketIds.length > 2 ? [activeTopMarketIds[2]] : [BigInt(0)]
     });
 
     // Process markets and create display data
     useEffect(() => {
-        if (!topMarketIds || !activeMarketIds) return;
+        if (!activeTopMarketIds || activeTopMarketIds.length === 0) return;
 
         const markets: MarketData[] = [];
         const marketDataArray = [
-            { data: market1, id: firstMarketId },
-            { data: market2, id: secondMarketId },
-            { data: market3, id: thirdMarketId }
+            { data: market1, id: activeTopMarketIds[0] },
+            { data: market2, id: activeTopMarketIds[1] },
+            { data: market3, id: activeTopMarketIds[2] }
         ];
 
-        marketDataArray.forEach(({ data, id }) => {
-            if (data && id && activeMarketIds.includes(id)) {
+        marketDataArray.forEach(({ data, id }, index) => {
+            if (data && id) {
                 const totalOptionAShares = Number(data[6]) / 1000000;
                 const totalOptionBShares = Number(data[7]) / 1000000;
                 const totalVolume = totalOptionAShares + totalOptionBShares;
@@ -88,11 +83,14 @@ export function HeroBanner() {
                     totalVolume,
                     yesPercentage
                 });
+                
+                console.log(`🔥 Hero market ${index + 1}:`, data[0], `Volume: $${totalVolume.toFixed(2)}`);
             }
         });
 
         setTopMarkets(markets);
-    }, [topMarketIds, activeMarketIds, market1, market2, market3, firstMarketId, secondMarketId, thirdMarketId]);
+        console.log("📊 Total hero markets loaded:", markets.length);
+    }, [activeTopMarketIds, market1, market2, market3]);
 
     // Auto-rotate markets every 4 seconds
     useEffect(() => {
