@@ -19,11 +19,11 @@ export function HeroBanner() {
     const [topMarkets, setTopMarkets] = useState<MarketData[]>([]);
     const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
 
-    // Get top 3 markets by volume from active markets
+    // Get more markets by volume to ensure we have enough active ones
     const { data: topMarketIds, refetch: refetchTopMarkets } = useReadContract({
         contract,
         method: "function getMarketsByVolume(uint256 _limit) view returns (uint256[])",
-        params: [BigInt(3)] // Get top 3 by volume
+        params: [BigInt(10)] // Get top 10 by volume to ensure we can find 3 active ones
     });
 
     // Get active markets to filter out expired/resolved ones
@@ -39,8 +39,15 @@ export function HeroBanner() {
     // Filter topMarketIds to only include active markets and get first 3
     const activeTopMarketIds = useMemo(() => {
         if (!topMarketIds || !activeMarketIds) return [];
+        
+        console.log("🔍 All topMarketIds:", topMarketIds.map(id => Number(id)));
+        console.log("🔍 All activeMarketIds:", activeMarketIds.map(id => Number(id)));
+        
         const filtered = topMarketIds.filter(id => activeMarketIds.includes(id)).slice(0, 3);
-        console.log("📊 Debug - activeTopMarketIds:", filtered);
+        
+        console.log("🔍 Filtered activeTopMarketIds:", filtered.map(id => Number(id)));
+        console.log("🔍 Final count for hero banner:", filtered.length);
+        
         return filtered;
     }, [topMarketIds, activeMarketIds]);
 
